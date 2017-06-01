@@ -1,6 +1,6 @@
 {
   "name": "hapi-registrar",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Automated registration for Hapi Methods and Routes",
   "main": "src/index.js",
   "scripts": {
