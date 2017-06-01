@@ -10,8 +10,24 @@
     "name": "Iain Reid",
     "email": "iainreid382@gmail.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iainreid820/hapi-registrar.git"
+  },
+  "keywords": [
+    "hapi",
+    "method",
+    "route",
+    "automated",
+    "automatic",
+    "registration"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iainreid820/hapi-registrar/issues"
+  },
+  "homepage": "https://github.com/iainreid820/hapi-registrar#readme",
   "dependencies": {
     "ramda": "^0.24.0"
-  },
-  "license": "MIT"
+  }
 }
