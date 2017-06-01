@@ -1,0 +1,17 @@
+{
+  "name": "hapi-registrar",
+  "version": "0.0.0",
+  "description": "Automated registration for Hapi Methods and Routes",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "Iain Reid",
+    "email": "iainreid382@gmail.com"
+  },
+  "dependencies": {
+    "ramda": "^0.24.0"
+  },
+  "license": "MIT"
+}
