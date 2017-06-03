@@ -4,10 +4,6 @@
 const R = require('ramda')
 
 class Method {
-  setName (name) {
-    this.name = name
-  }
-
   setMethod (method) {
     this.method = method
   }
@@ -16,10 +12,16 @@ class Method {
     this.options = options
   }
 
-  static from ({ name, method, options }) {
+  static from (options, method) {
+    if (typeof options === 'function') {
+      method = options;
+      options = {};
+    } else if (typeof method !== 'function') {
+      throw new TypeError('"method" argument must be a function');
+    }
+
     const method_ = new Method()
 
-    method_.setName(name)
     method_.setMethod(method)
     method_.setOptions(options)
 
@@ -28,10 +30,6 @@ class Method {
 }
 
 class Route {
-  setPath (path) {
-    this.path = path
-  }
-
   setMethod (method) {
     this.method = method
   }
@@ -40,12 +38,23 @@ class Route {
     this.handler = handler
   }
 
-  static from ({ path, method, handler }) {
+  setSegments (segments) {
+    this.segments = segments
+  }
+
+  static from (method, segments, handler) {
+    if (typeof segments === 'function') {
+      handler = segments;
+      segments = [];
+    } else if (typeof handler !== 'function') {
+      throw new TypeError('"handler" argument must be a function');
+    }
+
     const route_ = new Route()
 
-    route_.setPath(path)
     route_.setMethod(method)
     route_.setHandler(handler)
+    route_.setSegments(segments)
 
     return route_
   }
@@ -54,14 +63,20 @@ class Route {
 exports.register = function (server, options, next) {
   // Methods
   R.forEachObjIndexed((method, name) => {
-    method.setName(name)
-    server.method(method)
+    server.method({
+      name,
+      method: method.method,
+      options: method.options
+    })
   })(flattenObjBy(Method, options.methods || {}))
 
   // Routes
   R.forEachObjIndexed((route, path) => {
-    route.setPath(`/${path}`)
-    server.route(route)
+    server.route({
+      path: '/' + path,
+      method: route.method,
+      handler: route.handler
+    })
   })(flattenObjBy(Route, options.routes || {}))
 
   next()
