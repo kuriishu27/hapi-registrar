@@ -3,6 +3,10 @@
 // Dependencies
 const R = require('ramda')
 
+// Entities
+const Route = require('./router').Route
+const Router = require('./router').Router
+
 class Method {
   setMethod (method) {
     this.method = method
@@ -14,8 +18,8 @@ class Method {
 
   static from (options, method) {
     if (typeof options === 'function') {
-      method = options;
-      options = {};
+      method = options
+      options = {}
     } else if (typeof method !== 'function') {
       throw new TypeError('"method" argument must be a function');
     }
@@ -29,55 +33,47 @@ class Method {
   }
 }
 
-class Route {
-  setMethod (method) {
-    this.method = method
-  }
-
-  setHandler (handler) {
-    this.handler = handler
-  }
-
-  setSegments (segments) {
-    this.segments = segments
-  }
-
-  static from (method, segments, handler) {
-    if (typeof segments === 'function') {
-      handler = segments;
-      segments = [];
-    } else if (typeof handler !== 'function') {
-      throw new TypeError('"handler" argument must be a function');
-    }
-
-    const route_ = new Route()
-
-    route_.setMethod(method)
-    route_.setHandler(handler)
-    route_.setSegments(segments)
-
-    return route_
-  }
-}
-
 exports.register = function (server, options, next) {
   // Methods
-  R.forEachObjIndexed((method, name) => {
+  R.forEach(([name, method]) => {
     server.method({
       name,
       method: method.method,
       options: method.options
     })
-  })(flattenObjBy(Method, options.methods || {}))
+  })(flattenObjBy(Method, options.methods))
 
   // Routes
-  R.forEachObjIndexed((route, path) => {
+  R.forEach(([path, route]) => {
+    const url = R.compose(
+      R.join('/'),
+      R.prepend(''),
+      R.concat
+    )([path], route.segments)
+
     server.route({
-      path: '/' + path,
+      path: url,
       method: route.method,
       handler: route.handler
     })
-  })(flattenObjBy(Route, options.routes || {}))
+  })(flattenObjBy(Route, options.routes))
+
+  // Routers
+  R.forEach(([path, router]) => {
+    for (const route of router.getRoutes()) {
+      const url = R.compose(
+        R.join('/'),
+        R.prepend(''),
+        R.concat
+      )([path], route.segments)
+
+      server.route({
+        path: url,
+        method: route.method,
+        handler: route.handler
+      })
+    }
+  })(flattenObjBy(Router, options.routes))
 
   next()
 }
@@ -87,16 +83,20 @@ exports.register.attributes = {
 }
 
 function flattenObjBy (type, obj) {
-  const go = obj_ => R.chain(([k, v]) => {
-    if (!(v instanceof type)) {
-      return R.map(([k_, v_]) => [`${k}.${k_}`, v_], go(v))
-    } else {
-      return [[k, v]]
-    }
-  }, R.toPairs(obj_))
+  return R.compose(
+    R.chain(([lookup, value]) => {
+      if (R.is(type, value)) {
+        return [[lookup, value]]
+      } else if (typeof value === "object") {
+        return R.map(([name, value]) => [`${lookup}.${name}`, value], flattenObjBy(type, value))
+      }
 
-  return R.fromPairs(go(obj))
+      return []
+    }),
+    R.toPairs
+  )(obj)
 }
 
-exports.Method = Method
 exports.Route = Route
+exports.Router = Router
+exports.Method = Method
