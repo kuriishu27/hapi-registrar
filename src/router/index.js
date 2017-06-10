@@ -7,26 +7,26 @@ class Route {
     this.method = method
   }
 
-  setHandler (handler) {
-    this.handler = handler
+  setConfig (config) {
+    this.config = config
   }
 
   setSegments (segments) {
     this.segments = segments
   }
 
-  static from (method, segments, handler) {
-    if (typeof segments === 'function') {
-      handler = segments
+  static from (method, segments, config) {
+    if (segments.constructor === Object) {
+      config = segments
       segments = []
-    } else if (typeof handler !== 'function') {
-      throw new TypeError('"handler" argument must be a function');
+    } else if (!config || config.constructor !== Object) {
+      throw new TypeError('"config" argument must be an object');
     }
 
     const route_ = new Route()
 
     route_.setMethod(method)
-    route_.setHandler(handler)
+    route_.setConfig(config)
     route_.setSegments(segments)
 
     return route_
@@ -54,7 +54,7 @@ class Router {
         options.browse && router.addRoute('GET', options.browse)
         options.read && router.addRoute('GET', ['{id}'], options.read)
         options.edit && router.addRoute('PATCH', ['{id}'], options.edit)
-        options.add && router.addRoute('PUT', ['{id}'], options.add)
+        options.add && router.addRoute('PUT', options.add)
         options.delete && router.addRoute('DELETE', ['{id}'], options.delete)
         break
 

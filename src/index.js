@@ -7,6 +7,20 @@ const R = require('ramda')
 const Route = require('./router').Route
 const Router = require('./router').Router
 
+class Handler {
+  setHandler(handler) {
+    this.handler = handler
+  }
+
+  static from (handler) {
+    const handler_ = new Handler();
+
+    handler_.setHandler(handler)
+
+    return handler_
+  }
+}
+
 class Method {
   setMethod (method) {
     this.method = method
@@ -34,6 +48,11 @@ class Method {
 }
 
 exports.register = function (server, options, next) {
+  // Handlers
+  R.forEach(([name, handler]) => {
+    server.handler(name, handler.handler)
+  })(flattenObjBy(Handler, options.handlers))
+
   // Methods
   R.forEach(([name, method]) => {
     server.method({
@@ -54,7 +73,7 @@ exports.register = function (server, options, next) {
     server.route({
       path: url,
       method: route.method,
-      handler: route.handler
+      config: route.config
     })
   })(flattenObjBy(Route, options.routes))
 
@@ -70,7 +89,7 @@ exports.register = function (server, options, next) {
       server.route({
         path: url,
         method: route.method,
-        handler: route.handler
+        config: route.config
       })
     }
   })(flattenObjBy(Router, options.routes))
@@ -100,3 +119,4 @@ function flattenObjBy (type, obj) {
 exports.Route = Route
 exports.Router = Router
 exports.Method = Method
+exports.Handler = Handler
