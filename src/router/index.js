@@ -16,20 +16,20 @@ class Route {
   }
 
   static from (method, segments, config) {
-    if (segments.constructor === Object) {
+    if (!config && segments.constructor === Object) {
       config = segments
       segments = []
     } else if (!config || config.constructor !== Object) {
-      throw new TypeError('"config" argument must be an object');
+      throw new TypeError('"config" argument must be an object')
     }
 
-    const route_ = new Route()
+    const route = new Route()
 
-    route_.setMethod(method)
-    route_.setConfig(config)
-    route_.setSegments(segments)
+    route.setMethod(method)
+    route.setConfig(config)
+    route.setSegments(segments)
 
-    return route_
+    return route
   }
 }
 
@@ -46,20 +46,48 @@ class Router {
     return routes.get(this)
   }
 
-  static using (strategy, options) {
+  static using (strategy, options, config) {
+    if (!config && options.constructor === Object) {
+      config = options
+      options = {}
+    } else if (!config && options.constructor !== Object) {
+      throw new TypeError('"config" argument must be an object')
+    }
+
     const router = new Router()
+    let paramName = '{id}'
+
+    if (options.paramName) {
+      paramName = `{${options.paramName}}`
+    }
 
     switch (strategy) {
       case 'BREAD':
-        options.browse && router.addRoute('GET', options.browse)
-        options.read && router.addRoute('GET', ['{id}'], options.read)
-        options.edit && router.addRoute('PATCH', ['{id}'], options.edit)
-        options.add && router.addRoute('PUT', options.add)
-        options.delete && router.addRoute('DELETE', ['{id}'], options.delete)
+        config.browse && router.addRoute('GET', config.browse)
+        config.read && router.addRoute('GET', [paramName], config.read)
+        config.edit && router.addRoute('PATCH', [paramName], config.edit)
+        config.add && router.addRoute('PUT', config.add)
+        config.delete && router.addRoute('DELETE', [paramName], config.delete)
         break
 
       default:
         throw TypeError(`Unknown strategy '${strategy}'`)
+    }
+
+    if (options.subroutes) {
+      if (!options.paramName) {
+        throw new Error('"paramName" must be specified')
+      }
+
+      const subroutes = {}
+
+      for (const subroute in options.subroutes) {
+        if (options.subroutes.hasOwnProperty(subroute)) {
+          subroutes[subroute] = options.subroutes[subroute]
+        }
+      }
+
+      router[`{${options.paramName}}`] = subroutes
     }
 
     return router

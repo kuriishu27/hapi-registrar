@@ -28,6 +28,6 @@
   },
   "homepage": "https://github.com/iainreid820/hapi-registrar#readme",
   "dependencies": {
-    "ramda": "^0.24.0"
+    "ramda": "^0.24.1"
   }
 }

@@ -8,7 +8,7 @@ const Route = require('./router').Route
 const Router = require('./router').Router
 
 class Handler {
-  setHandler(handler) {
+  setHandler (handler) {
     this.handler = handler
   }
 
@@ -84,7 +84,9 @@ exports.register = function (server, options, next) {
         R.join('/'),
         R.prepend(''),
         R.concat
-      )([path], route.segments)
+      )(R.split('.', path), route.segments)
+
+      console.log(url)
 
       server.route({
         path: url,
@@ -105,7 +107,7 @@ function flattenObjBy (type, obj) {
   return R.compose(
     R.chain(([lookup, value]) => {
       if (R.is(type, value)) {
-        return [[lookup, value]]
+        return [[lookup, value], ...R.map(([name, value]) => [`${lookup}.${name}`, value], flattenObjBy(type, value))]
       } else if (typeof value === "object") {
         return R.map(([name, value]) => [`${lookup}.${name}`, value], flattenObjBy(type, value))
       }
