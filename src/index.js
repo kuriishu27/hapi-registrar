@@ -86,8 +86,6 @@ exports.register = function (server, options, next) {
         R.concat
       )(R.split('.', path), route.segments)
 
-      console.log(url)
-
       server.route({
         path: url,
         method: route.method,
