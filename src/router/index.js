@@ -62,6 +62,16 @@ class Router {
     }
 
     switch (strategy) {
+      case 'default':
+        for (let method in config) {
+          if (config.hasOwnProperty(method)) {
+            if (config[method].constructor === Array) {
+              router.addRoute(method, [config[method][0]], config[method][1])
+            } else {
+              router.addRoute(method, config[method])
+            }
+          }
+        }
       case 'BREAD':
         config.browse && router.addRoute('GET', config.browse)
         config.read && router.addRoute('GET', [paramName], config.read)
