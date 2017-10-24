@@ -50,12 +50,12 @@ class Method {
 exports.register = function (server, options, next) {
   // Handlers
   R.forEach(([name, handler]) => {
-    server.handler(name, handler.handler)
+    server.root.handler(name, handler.handler)
   })(flattenObjBy(Handler, options.handlers))
 
   // Methods
   R.forEach(([name, method]) => {
-    server.method({
+    server.root.method({
       name,
       method: method.method,
       options: method.options
@@ -70,7 +70,7 @@ exports.register = function (server, options, next) {
       R.concat
     )([path], route.segments)
 
-    server.route({
+    server.root.route({
       path: url,
       method: route.method,
       config: route.config
@@ -86,7 +86,7 @@ exports.register = function (server, options, next) {
         R.concat
       )(R.split('.', path), route.segments)
 
-      server.route({
+      server.root.route({
         path: url,
         method: route.method,
         config: route.config
@@ -101,13 +101,17 @@ exports.register.attributes = {
   name: 'hapi-registrar'
 }
 
-function flattenObjBy (type, obj) {
+function flattenObjBy (type, obj, processed = []) {
   return R.compose(
     R.chain(([lookup, value]) => {
-      if (R.is(type, value)) {
-        return [[lookup, value], ...R.map(([name, value]) => [`${lookup}.${name}`, value], flattenObjBy(type, value))]
-      } else if (typeof value === "object") {
-        return R.map(([name, value]) => [`${lookup}.${name}`, value], flattenObjBy(type, value))
+      if (!processed.includes(value)) {
+        processed.push(value)
+
+        if (R.is(type, value)) {
+          return [[lookup, value], ...R.map(([name, value]) => [`${lookup}.${name}`, value], flattenObjBy(type, value, processed))]
+        } else if (typeof value === "object") {
+          return R.map(([name, value]) => [`${lookup}.${name}`, value], flattenObjBy(type, value, processed))
+        }
       }
 
       return []
