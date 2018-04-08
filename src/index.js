@@ -47,6 +47,22 @@ class Method {
   }
 }
 
+class Resource {
+  init(setup) {
+    return Router.using(this.strategy, this.options(setup), this.config(setup))
+  }
+
+  static from (strategy, options, config) {
+    const resource = new Resource()
+
+    resource.strategy = strategy
+    resource.options = options
+    resource.config = config
+
+    return resource
+  }
+}
+
 exports.register = function (server, options, next) {
   // Handlers
   R.forEach(([name, handler]) => {
@@ -124,3 +140,4 @@ exports.Route = Route
 exports.Router = Router
 exports.Method = Method
 exports.Handler = Handler
+exports.Resource = Resource
