@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/iainreid820/hapi-registrar#readme",
   "dependencies": {
-    "ramda": "^0.24.1"
+    "ramda": "^0.25.0"
   },
   "greenkeeper": {
     "commitMessages": {
