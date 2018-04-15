@@ -4,5 +4,4 @@
 
 # Ignore all Node.js and NPM related paths
 npm-debug.log
-package-lock.json
 node_modules
