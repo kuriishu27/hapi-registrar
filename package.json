@@ -47,6 +47,6 @@
     "proseWrap": "always"
   },
   "devDependencies": {
-    "prettier": "^1.13.5"
+    "prettier": "^1.14.3"
   }
 }
