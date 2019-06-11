@@ -78,7 +78,12 @@ class Router {
         config.edit && router.addRoute("PATCH", [paramName], config.edit);
         config.add && router.addRoute("PUT", config.add);
         config.delete && router.addRoute("DELETE", [paramName], config.delete);
-        break;
+        break
+
+      case 'CUSTOMPOST':
+      config.post && router.addRoute('POST', [paramName], config.post)
+      config.authenticate && router.addRoute('POST', [paramName], config.post)
+        break
 
       default:
         throw TypeError(`Unknown strategy '${strategy}'`);
