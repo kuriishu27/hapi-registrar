@@ -64,7 +64,8 @@ class Resource {
 }
 
 exports.plugin = {
-  async function (server, options) {
+
+  async register (server, options) {
       // Handlers
     R.forEach(([name, handler]) => {
       server.root.handler(name, handler.handler);
@@ -112,10 +113,6 @@ exports.plugin = {
     })(flattenObjBy(Router, options.routes))
   },
   pkg: require('../package.json')
-};
-
-exports.register.attributes = {
-  name: "hapi-registrar"
 };
 
 function flattenObjBy(type, obj, processed = []) {
