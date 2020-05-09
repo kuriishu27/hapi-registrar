@@ -63,54 +63,55 @@ class Resource {
   }
 }
 
-exports.register = function(server, options, next) {
-  // Handlers
-  R.forEach(([name, handler]) => {
-    server.root.handler(name, handler.handler);
-  })(flattenObjBy(Handler, options.handlers));
+exports.plugin = {
+  async function (server, options) {
+      // Handlers
+    R.forEach(([name, handler]) => {
+      server.root.handler(name, handler.handler);
+    })(flattenObjBy(Handler, options.handlers));
 
-  // Methods
-  R.forEach(([name, method]) => {
-    server.root.method({
-      name,
-      method: method.method,
-      options: method.options
-    });
-  })(flattenObjBy(Method, options.methods));
+    // Methods
+    R.forEach(([name, method]) => {
+      server.root.method({
+        name,
+        method: method.method,
+        options: method.options
+      });
+    })(flattenObjBy(Method, options.methods));
 
-  // Routes
-  R.forEach(([path, route]) => {
-    const url = R.compose(
-      R.join("/"),
-      R.prepend(""),
-      R.concat
-    )([path], route.segments);
-
-    server.root.route({
-      path: url,
-      method: route.method,
-      config: route.config
-    });
-  })(flattenObjBy(Route, options.routes));
-
-  // Routers
-  R.forEach(([path, router]) => {
-    for (const route of router.getRoutes()) {
+    // Routes
+    R.forEach(([path, route]) => {
       const url = R.compose(
         R.join("/"),
         R.prepend(""),
         R.concat
-      )(R.split(".", path), route.segments);
+      )([path], route.segments);
 
       server.root.route({
         path: url,
         method: route.method,
         config: route.config
       });
-    }
-  })(flattenObjBy(Router, options.routes));
+    })(flattenObjBy(Route, options.routes));
 
-  next();
+    // Routers
+    R.forEach(([path, router]) => {
+      for (const route of router.getRoutes()) {
+        const url = R.compose(
+          R.join("/"),
+          R.prepend(""),
+          R.concat
+        )(R.split(".", path), route.segments);
+
+        server.root.route({
+          path: url,
+          method: route.method,
+          config: route.config
+        });
+      }
+    })(flattenObjBy(Router, options.routes))
+  },
+  pkg: require('../package.json')
 };
 
 exports.register.attributes = {
