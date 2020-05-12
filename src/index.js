@@ -1,7 +1,7 @@
 "use strict";
 
 // Dependencies
-const R = require("ramda");
+const R = require("ramda")
 
 // Entities
 const Route = require("./router").Route;
@@ -65,15 +65,16 @@ class Resource {
 
 exports.plugin = {
 
-  async register (server, options) {
-      // Handlers
+  async register(server, options) {
+
+    // Handlers
     R.forEach(([name, handler]) => {
-      server.root.handler(name, handler.handler);
+      server.decorate('handler', name, handler.handler)
     })(flattenObjBy(Handler, options.handlers));
 
     // Methods
     R.forEach(([name, method]) => {
-      server.root.method({
+      server.method({
         name,
         method: method.method,
         options: method.options
@@ -88,11 +89,12 @@ exports.plugin = {
         R.concat
       )([path], route.segments);
 
-      server.root.route({
+      server.route({
         path: url,
         method: route.method,
-        config: route.config
+        options: route.config
       });
+
     })(flattenObjBy(Route, options.routes));
 
     // Routers
@@ -103,11 +105,10 @@ exports.plugin = {
           R.prepend(""),
           R.concat
         )(R.split(".", path), route.segments);
-
-        server.root.route({
+        server.route({
           path: url,
           method: route.method,
-          config: route.config
+          options: route.config
         });
       }
     })(flattenObjBy(Router, options.routes))
